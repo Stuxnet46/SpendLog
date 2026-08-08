@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SPENDLOG</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DARK THEME — Cyber Green (adopted from Tempora/Cashlog)
+   ============================================================ */
+[data-theme="dark"] {
+  --bg: #020d0a; --bg-card: #061410; --bg-panel: #0a1f1a;
+  --accent: #00ff88; --accent-dim: #00c866; --accent-dark: #004d2a;
+  --accent-glow: rgba(0,255,136,.15); --accent-glow2: rgba(0,255,136,.32);
+  --text: #e0fff2; --text2: #7ab89a; --text3: #3a6b52;
+  --red: #ff4466; --yellow: #ffcc00; --green-ok: #00ff88;
+  --border: rgba(0,255,136,.2); --border2: rgba(0,255,136,.5);
+  --shadow: 0 4px 24px rgba(0,0,0,.5);
+  --footer-bg: linear-gradient(90deg,#020d0a,#041a12,#020d0a);
+  --header-bg: rgba(2,13,10,.92);
+  --hero-bg: linear-gradient(135deg,#041a10,#081f14,#041a10);
+  --input-bg: #0a1f1a; --input-border: rgba(0,255,136,.3);
+  --num-bg: #0a1f1a; --num-active: #004d2a;
+  --font-main: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', monospace;
+  --radius-card: 12px; --radius-btn: 10px;
+}
+/* ============================================================
+   LIGHT THEME — Grab Green (clean)
+   ============================================================ */
+[data-theme="light"] {
+  --bg: #f0f7f2; --bg-card: #ffffff; --bg-panel: #e8f5ee;
+  --accent: #00a651; --accent-dim: #008c44; --accent-dark: #d4eddf;
+  --accent-glow: rgba(0,166,81,.1); --accent-glow2: rgba(0,166,81,.2);
+  --text: #0d2b1a; --text2: #2d6b46; --text3: #7ab89a;
+  --red: #d0021b; --yellow: #f5a623; --green-ok: #00a651;
+  --border: rgba(0,166,81,.18); --border2: rgba(0,166,81,.4);
+  --shadow: 0 2px 12px rgba(0,100,50,.1);
+  --footer-bg: #00a651;
+  --header-bg: rgba(255,255,255,.95);
+  --hero-bg: linear-gradient(135deg,#d4eddf,#edf8f2,#d4eddf);
+  --input-bg: #f5fbf7; --input-border: rgba(0,166,81,.3);
+  --num-bg: #ffffff; --num-active: #d4eddf;
+  --font-main: 'Inter', sans-serif;
+  --font-mono: 'Inter', sans-serif;
+  --font-display: 'Inter', sans-serif;
+  --radius-card: 16px; --radius-btn: 14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-main);min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .3s,color .3s;}
+[data-theme="dark"] body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);pointer-events:none;z-index:9998;}
+[data-theme="dark"] body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.app-wrapper{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;padding-bottom:44px;}
+button{font-family:inherit;} input,select{font-family:inherit;}
+
+/* ---------- FOOTER MARQUEE ---------- */
+.footer-marquee{position:fixed;bottom:0;left:0;right:0;height:28px;max-width:480px;margin:0 auto;background:var(--footer-bg);border-top:1px solid var(--border);display:flex;align-items:center;overflow:hidden;z-index:10000;}
+[data-theme="light"] .footer-marquee{border-top:none;}
+.marquee-track{display:flex;white-space:nowrap;animation:marquee 22s linear infinite;}
+.marquee-track span{font-family:var(--font-mono);font-size:10px;color:var(--accent-dim);letter-spacing:1px;padding-right:80px;}
+[data-theme="light"] .marquee-track span{color:rgba(255,255,255,.85);}
+.marquee-track span em{color:var(--accent);font-style:normal;}
+[data-theme="light"] .marquee-track span em{color:#fff;font-weight:700;}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ---------- THEME BUTTON ---------- */
+.theme-btn{display:flex;align-items:center;gap:6px;background:var(--bg-panel);border:1px solid var(--border2);border-radius:20px;padding:4px 10px 4px 6px;cursor:pointer;transition:all .3s;flex-shrink:0;}
+[data-theme="light"] .theme-btn{background:#f0f7f2;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.theme-btn-icon{font-size:14px;line-height:1;}
+.theme-btn-label{font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:1px;font-weight:700;}
+[data-theme="light"] .theme-btn-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:.5px;}
+
+/* ---------- PIN SCREEN ---------- */
+.screen{display:none;} .screen.active{display:flex;}
+#screen-pin{min-height:100vh;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px 50px;}
+.pin-card{width:100%;max-width:360px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+[data-theme="dark"] .pin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan-h 3s ease-in-out infinite;}
+@keyframes scan-h{0%,100%{opacity:.3}50%{opacity:1}}
+.pin-topbar{display:flex;justify-content:flex-end;margin-bottom:20px;}
+.pin-logo-wrap{text-align:center;margin-bottom:24px;}
+.pin-logo-box{width:72px;height:72px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;letter-spacing:1px;margin-bottom:12px;}
+[data-theme="dark"] .pin-logo-box{border:2px solid var(--accent);font-family:var(--font-display);color:var(--accent);text-shadow:0 0 16px var(--accent);box-shadow:0 0 28px var(--accent-glow2),inset 0 0 18px var(--accent-glow);animation:pulse-logo 2s ease-in-out infinite;background:transparent;}
+[data-theme="light"] .pin-logo-box{background:#00a651;font-family:'Inter',sans-serif;color:#fff;box-shadow:0 4px 16px rgba(0,166,81,.35);}
+@keyframes pulse-logo{0%,100%{box-shadow:0 0 20px var(--accent-glow2),inset 0 0 15px var(--accent-glow)}50%{box-shadow:0 0 40px var(--accent-glow2),inset 0 0 25px var(--accent-glow)}}
+.pin-badge{display:inline-block;border:1px solid var(--border2);border-radius:20px;padding:3px 14px;font-family:var(--font-mono);font-size:9px;color:var(--accent-dim);letter-spacing:2px;margin-bottom:10px;}
+[data-theme="light"] .pin-badge{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:1px;background:var(--accent-dark);color:var(--accent);border-color:var(--border2);}
+.pin-title{font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--text);letter-spacing:2px;}
+[data-theme="light"] .pin-title{letter-spacing:0;font-size:26px;}
+.pin-sub{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5;}
+.pin-label-sm{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:4px;}
+[data-theme="light"] .pin-label-sm{font-family:'Inter',sans-serif;letter-spacing:.5px;}
+.pin-dots{display:flex;justify-content:center;gap:10px;margin:18px 0 14px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;transition:all .2s;}
+[data-theme="light"] .pin-dot{border-color:var(--accent-dim);width:16px;height:16px;}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px var(--accent);}
+[data-theme="light"] .pin-dot.filled{box-shadow:none;}
+.pin-dot.error{background:var(--red);border-color:var(--red);animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pin-msg{text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-bottom:16px;min-height:16px;}
+[data-theme="light"] .pin-msg{font-family:'Inter',sans-serif;font-size:12px;}
+.pin-msg.error{color:var(--red);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.nk{background:var(--num-bg);border:1px solid var(--border);border-radius:var(--radius-btn);padding:16px 8px;font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);cursor:pointer;transition:all .15s;text-align:center;}
+[data-theme="light"] .nk{font-family:'Inter',sans-serif;font-size:22px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.07);border-color:transparent;}
+.nk:active{background:var(--num-active);color:var(--accent);border-color:var(--accent);transform:scale(.95);}
+[data-theme="light"] .nk:active{box-shadow:0 0 0 2px var(--accent);}
+.nk.del{font-family:var(--font-main);font-size:13px;font-weight:700;color:var(--red);border-color:rgba(208,2,27,.25);}
+[data-theme="light"] .nk.del{font-family:'Inter',sans-serif;font-size:13px;}
+.nk.empty{visibility:hidden;}
+
+/* ---------- APP HEADER ---------- */
+.app-header{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--header-bg);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);gap:8px;}
+[data-theme="light"] .app-header{box-shadow:0 1px 8px rgba(0,0,0,.08);}
+.header-logo{display:flex;align-items:center;gap:8px;}
+.logo-box{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;letter-spacing:.5px;flex-shrink:0;}
+[data-theme="dark"] .logo-box{border:2px solid var(--accent);font-family:var(--font-display);color:var(--accent);text-shadow:0 0 8px var(--accent);box-shadow:0 0 10px var(--accent-glow),inset 0 0 8px var(--accent-glow);background:transparent;}
+[data-theme="light"] .logo-box{background:#00a651;font-family:'Inter',sans-serif;color:#fff;}
+.logo-text{font-family:var(--font-display);font-size:13px;font-weight:800;color:var(--accent);letter-spacing:2px;}
+[data-theme="light"] .logo-text{letter-spacing:.5px;font-size:14px;}
+.logo-sub{font-family:var(--font-mono);font-size:8px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;}
+[data-theme="light"] .logo-sub{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.3px;}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.btn-logout{background:none;border:1px solid rgba(208,2,27,.35);color:var(--red);font-family:var(--font-mono);font-size:8px;padding:6px 9px;border-radius:8px;cursor:pointer;transition:all .2s;}
+[data-theme="light"] .btn-logout{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;border-radius:10px;}
+.btn-logout:active{background:rgba(208,2,27,.08);}
+
+/* ---------- NAV TABS ---------- */
+.nav-tabs{display:flex;background:var(--bg-card);border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:99;}
+[data-theme="light"] .nav-tabs{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.nav-tab{flex:1;padding:11px 2px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--font-main);font-size:12px;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+[data-theme="dark"] .nav-tab.active{text-shadow:0 0 6px var(--accent);}
+
+/* ---------- PAGES / CARDS ---------- */
+.page{display:none;padding:14px;} .page.active{display:block;}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:14px;margin-bottom:10px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+[data-theme="dark"] .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.35;}
+[data-theme="light"] .card{border-color:rgba(0,166,81,.1);}
+.card-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+[data-theme="light"] .card-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--text2);}
+.big-val{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--accent);}
+[data-theme="light"] .big-val{font-family:'Inter',sans-serif;}
+.card-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+
+.hero-card{background:var(--hero-bg);border:1px solid var(--border2);border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 0 20px var(--accent-glow);}
+[data-theme="light"] .hero-card{box-shadow:0 4px 16px rgba(0,166,81,.12);}
+.hero-label{font-family:var(--font-mono);font-size:9px;color:var(--accent-dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px;}
+[data-theme="light"] .hero-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:.5px;color:var(--accent);}
+.hero-amount{font-family:var(--font-display);font-size:26px;font-weight:900;color:var(--accent);line-height:1;margin-bottom:2px;}
+[data-theme="light"] .hero-amount{font-family:'Inter',sans-serif;}
+.hero-amount-sub{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.grid-2 .card{margin-bottom:0;}
+
+.stitle{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:8px;}
+[data-theme="light"] .stitle{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text2);}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ---------- ENTRY / HISTORY ROWS ---------- */
+.entry-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);}
+.entry-row:last-child{border-bottom:none;}
+.entry-nominal{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--text);}
+[data-theme="light"] .entry-nominal{font-family:'Inter',sans-serif;}
+.entry-time{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:2px;}
+[data-theme="light"] .entry-time{font-family:'Inter',sans-serif;}
+.entry-actions{display:flex;gap:6px;}
+.entry-cat{display:inline-block;padding:1px 8px;border-radius:6px;background:var(--accent-glow);color:var(--accent);font-family:var(--font-mono);font-size:9px;letter-spacing:.5px;margin-right:6px;}
+[data-theme="light"] .entry-cat{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;background:var(--accent-dark);}
+.icon-btn{width:30px;height:30px;border-radius:8px;background:var(--input-bg);border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex-shrink:0;}
+.icon-btn.danger{color:var(--red);border-color:rgba(208,2,27,.3);}
+
+.history-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);}
+.history-row:last-child{border-bottom:none;}
+.hd-date{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text);}
+[data-theme="light"] .hd-date{font-family:'Inter',sans-serif;}
+.hd-sub{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:2px;}
+[data-theme="light"] .hd-sub{font-family:'Inter',sans-serif;}
+.hd-total{font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--accent);}
+[data-theme="light"] .hd-total{font-family:'Inter',sans-serif;}
+
+.empty-note{padding:22px;text-align:center;color:var(--text2);font-size:12px;font-family:var(--font-mono);}
+[data-theme="light"] .empty-note{font-family:'Inter',sans-serif;}
+
+/* ---------- TOGGLE ---------- */
+.toggle-row-sm{display:flex;gap:8px;margin-bottom:10px;}
+.toggle-btn-sm{flex:1;text-align:center;padding:8px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-family:var(--font-main);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;transition:all .2s;}
+.toggle-btn-sm.active{background:var(--accent-dark);color:var(--accent);border-color:var(--border2);}
+[data-theme="light"] .toggle-btn-sm.active{background:var(--accent);color:#fff;}
+
+/* ---------- FORM / BUTTONS ---------- */
+.form-group{margin-bottom:14px;}
+.form-label{font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:block;}
+[data-theme="light"] .form-label{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text);}
+.form-input{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:9px;padding:12px;color:var(--text);font-family:var(--font-mono);font-size:15px;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;}
+[data-theme="light"] .form-input{font-family:'Inter',sans-serif;font-size:15px;border-radius:12px;background:#f5fbf7;}
+.form-input:focus{border-color:var(--accent);}
+select.form-input{font-family:var(--font-main);font-weight:600;}
+[data-theme="light"] select.form-input{font-family:'Inter',sans-serif;}
+
+.btn-primary{width:100%;padding:14px;background:var(--accent);border:none;border-radius:var(--radius-btn);color:#000;font-family:var(--font-display);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .2s;margin-top:4px;}
+[data-theme="light"] .btn-primary{font-family:'Inter',sans-serif;letter-spacing:.5px;color:#fff;border-radius:14px;font-size:15px;}
+.btn-primary:active{opacity:.85;transform:scale(.99);}
+
+.btn-secondary{width:100%;padding:13px;background:var(--input-bg);border:1px solid var(--border2);border-radius:var(--radius-btn);color:var(--accent);font-family:var(--font-main);font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-top:10px;}
+[data-theme="light"] .btn-secondary{font-family:'Inter',sans-serif;border-radius:14px;font-size:14px;}
+.btn-secondary:active{background:var(--accent-dark);transform:scale(.99);}
+
+.storage-warn{background:var(--bg-card);border:1px solid var(--red);color:var(--red);border-radius:10px;padding:9px 12px;font-size:11.5px;margin:0 14px 10px;font-family:var(--font-mono);}
+[data-theme="light"] .storage-warn{font-family:'Inter',sans-serif;}
+
+/* ---------- CHANGE-PIN MODAL (bottom sheet) ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:5000;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;transition:background .3s;}
+.modal-overlay.open{background:rgba(0,0,0,.55);backdrop-filter:blur(3px);pointer-events:auto;}
+.modal-sheet{width:100%;max-width:480px;background:var(--bg-card);border:1px solid var(--border2);border-bottom:none;border-radius:22px 22px 0 0;padding:10px 22px 28px;box-shadow:0 -8px 32px rgba(0,0,0,.4);transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:3px;margin:6px auto 14px;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-title{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--text);letter-spacing:1px;}
+[data-theme="light"] .modal-title{font-family:'Inter',sans-serif;letter-spacing:0;font-size:17px;}
+.modal-close{width:30px;height:30px;border-radius:9px;background:var(--input-bg);border:1px solid var(--border);color:var(--text2);font-size:14px;cursor:pointer;}
+.modal-body{text-align:center;}
+.modal-body .pin-sub{margin-top:0;}
+.modal-body .pin-dots{margin:16px 0 12px;}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- PIN SCREEN -->
+<div class="screen active" id="screen-pin">
+  <div class="pin-card">
+    <div class="pin-topbar">
+      <button class="theme-btn" id="themeTogglePin">
+        <span class="theme-btn-icon" id="themeIconPin">☾</span>
+        <span class="theme-btn-label" id="themeLabelPin">DARK</span>
+      </button>
+    </div>
+    <div class="pin-logo-wrap">
+      <div class="pin-logo-box">SL</div>
+      <div class="pin-badge">GENTARA ANUGRAH</div>
+      <div class="pin-title">SPENDLOG</div>
+      <div class="pin-sub" id="pinSubText">Buat PIN 6 digit untuk mengamankan data pengeluaranmu</div>
+    </div>
+    <div class="pin-label-sm" id="pinLabelSm">BUAT PIN</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="pin-msg" id="pinMsg">&nbsp;</div>
+    <div class="numpad" id="numpad">
+      <button class="nk" data-n="1">1</button><button class="nk" data-n="2">2</button><button class="nk" data-n="3">3</button>
+      <button class="nk" data-n="4">4</button><button class="nk" data-n="5">5</button><button class="nk" data-n="6">6</button>
+      <button class="nk" data-n="7">7</button><button class="nk" data-n="8">8</button><button class="nk" data-n="9">9</button>
+      <button class="nk empty"></button><button class="nk" data-n="0">0</button><button class="nk del" id="pinDel">⌫</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app-wrapper" id="mainApp" style="display:none;">
+
+  <header class="app-header">
+    <div class="header-logo">
+      <div class="logo-box">SL</div>
+      <div>
+        <div class="logo-text">SPENDLOG</div>
+        <div class="logo-sub">Gentara Anugrah</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn-logout" id="btnLogout">KELUAR</button>
+      <button class="theme-btn" id="themeToggle">
+        <span class="theme-btn-icon" id="themeIcon">☾</span>
+        <span class="theme-btn-label" id="themeLabel">DARK</span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="input">Input</button>
+    <button class="nav-tab" data-tab="log">Log Harian</button>
+    <button class="nav-tab" data-tab="recap">Rekap</button>
+    <button class="nav-tab" data-tab="setelan">Setelan</button>
+  </nav>
+
+  <div id="storageWarnSlot"></div>
+
+  <!-- INPUT PAGE -->
+  <div class="page active" id="page-input">
+    <div class="card">
+      <div class="card-label">Catat Pengeluaran</div>
+
+      <div class="form-group">
+        <label class="form-label">Nominal (Rp)</label>
+        <input class="form-input" type="text" id="inpNominal" inputmode="numeric" placeholder="contoh: 20000">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nama Barang / Keperluan</label>
+        <input class="form-input" type="text" id="inpItem" placeholder="contoh: Nasi Padang">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <select class="form-input" id="inpCategory">
+          <option value="Makan">🍚 Makan</option>
+          <option value="Transport">⛽ Transport</option>
+          <option value="Belanja">🛒 Belanja</option>
+          <option value="Tagihan">🧾 Tagihan</option>
+          <option value="Lainnya">📌 Lainnya</option>
+        </select>
+      </div>
+
+      <div class="card-sub" id="autoTimeDisplay" style="font-family:var(--font-mono);margin-bottom:6px;">—</div>
+
+      <button class="btn-primary" id="btnSave">+ SIMPAN PENGELUARAN</button>
+    </div>
+  </div>
+
+  <!-- LOG PAGE -->
+  <div class="page" id="page-log">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+      <button class="icon-btn" id="prevDay">‹</button>
+      <div class="hd-date" id="dayLabel">—</div>
+      <button class="icon-btn" id="nextDay">›</button>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Item Hari Ini</div>
+        <div class="big-val" id="dayCount">0</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total Pengeluaran</div>
+        <div class="big-val" id="dayTotal">Rp0</div>
+      </div>
+    </div>
+
+    <div class="stitle">Riwayat</div>
+    <div class="card" style="padding:0;">
+      <div id="logList"></div>
+    </div>
+  </div>
+
+  <!-- RECAP PAGE -->
+  <div class="page" id="page-recap">
+    <div class="toggle-row-sm">
+      <div class="toggle-btn-sm active" data-recap="week">MINGGUAN</div>
+      <div class="toggle-btn-sm" data-recap="month">BULANAN</div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-label" id="recapRangeLabel">MINGGU INI</div>
+      <div class="hero-amount" id="recapTotalAmount">Rp0</div>
+      <div class="hero-amount-sub" id="recapTotalSub">TOTAL · 0 ITEM</div>
+    </div>
+
+    <div class="stitle">Rincian Per Hari</div>
+    <div class="card" style="padding:0;">
+      <div id="recapList"></div>
+    </div>
+  </div>
+
+  <!-- SETELAN PAGE -->
+  <div class="page" id="page-setelan">
+    <div class="card">
+      <div class="card-label">Cadangkan Data</div>
+      <div class="card-sub" style="margin-bottom:12px;">Simpan seluruh catatan pengeluaran sebagai file JSON, atau muat kembali dari file cadangan.</div>
+      <button class="btn-primary" id="btnExport">⬇ EXPORT JSON</button>
+      <button class="btn-secondary" id="btnImportTrigger">⬆ IMPORT JSON</button>
+      <input type="file" id="fileImport" accept="application/json,.json" style="display:none;">
+    </div>
+
+    <div class="card">
+      <div class="card-label">Keamanan</div>
+      <div class="card-sub" style="margin-bottom:12px;">Ubah PIN 6 digit yang digunakan untuk membuka SpendLog.</div>
+      <button class="btn-secondary" id="btnChangePin">🔒 UBAH PIN</button>
+    </div>
+  </div>
+
+  <div class="footer-marquee">
+    <div class="marquee-track">
+      <span>SPENDLOG <em>•</em> GENTARA ANUGRAH <em>•</em> CATAT SETIAP RUPIAH <em>•</em> MONITORING PENGELUARAN HARIAN <em>•</em></span>
+      <span>SPENDLOG <em>•</em> GENTARA ANUGRAH <em>•</em> CATAT SETIAP RUPIAH <em>•</em> MONITORING PENGELUARAN HARIAN <em>•</em></span>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PIN MODAL -->
+<div class="modal-overlay" id="pinModalOverlay">
+  <div class="modal-sheet" id="pinModalSheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="cpTitle">Ubah PIN</div>
+      <button class="modal-close" id="cpClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pin-sub" id="cpSub">Masukkan PIN saat ini</div>
+      <div class="pin-dots" id="cpDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-msg" id="cpMsg">&nbsp;</div>
+      <div class="numpad" id="cpNumpad">
+        <button class="nk" data-cn="1">1</button><button class="nk" data-cn="2">2</button><button class="nk" data-cn="3">3</button>
+        <button class="nk" data-cn="4">4</button><button class="nk" data-cn="5">5</button><button class="nk" data-cn="6">6</button>
+        <button class="nk" data-cn="7">7</button><button class="nk" data-cn="8">8</button><button class="nk" data-cn="9">9</button>
+        <button class="nk empty"></button><button class="nk" data-cn="0">0</button><button class="nk del" id="cpDel">⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+let expenses = [];
+let viewDate = new Date(); viewDate.setHours(0,0,0,0);
+let recapMode = 'week';
+let storageOk = true;
+
+// ---- PIN STATE ----
+let storedPin = null;
+let pinMode = 'checking'; // 'setup-first' | 'setup-confirm' | 'login'
+let pinBuffer = '';
+let tempFirstPin = '';
+
+function pad(n){return n.toString().padStart(2,"0");}
+function dateKey(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function formatRupiah(n){return "Rp"+Number(n).toLocaleString("id-ID");}
+function formatFullDate(d){return HARI[d.getDay()]+", "+d.getDate()+" "+BULAN[d.getMonth()]+" "+d.getFullYear();}
+function formatShortDate(d){return d.getDate()+" "+BULAN[d.getMonth()].slice(0,3);}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function showStorageWarning(){
+  const slot = document.getElementById('storageWarnSlot');
+  if(!slot || document.getElementById('storageWarn')) return;
+  const el = document.createElement('div');
+  el.id='storageWarn'; el.className='storage-warn';
+  el.textContent='⚠ Penyimpanan otomatis sedang bermasalah — data hanya tersimpan sementara di sesi ini.';
+  slot.appendChild(el);
+}
+
+async function loadExpenses(){
+  if(!storageOk) return;
+  try{
+    const res = await window.storage.get('expenses', false);
+    expenses = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ expenses = []; }
+}
+async function saveExpenses(){
+  if(!storageOk) return;
+  try{
+    await window.storage.set('expenses', JSON.stringify(expenses), false);
+  }catch(e){
+    console.error("Gagal menyimpan ke penyimpanan persisten:", e);
+    storageOk = false;
+    showStorageWarning();
+  }
+}
+
+function updateAutoTime(){
+  const now = new Date();
+  const el = document.getElementById('autoTimeDisplay');
+  if(el) el.textContent = "Waktu tercatat otomatis: "+formatFullDate(now)+" • "+pad(now.getHours())+":"+pad(now.getMinutes());
+}
+setInterval(updateAutoTime, 30000);
+
+// ---- THEME (synced across pin screen & main app) ----
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.body.setAttribute('data-theme', theme);
+  const icon = theme==='dark' ? '☾' : '☀';
+  const label = theme==='dark' ? 'DARK' : 'LIGHT';
+  ['themeIcon','themeIconPin'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=icon; });
+  ['themeLabel','themeLabelPin'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=label; });
+}
+function toggleTheme(){
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  applyTheme(isDark ? 'light' : 'dark');
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('themeTogglePin').addEventListener('click', toggleTheme);
+
+// ---- PIN LOGIC ----
+async function loadPin(){
+  try{
+    const res = await window.storage.get('pin', false);
+    storedPin = res && res.value ? res.value : null;
+  }catch(e){ storedPin = null; }
+}
+async function savePin(pin){
+  try{
+    await window.storage.set('pin', pin, false);
+    storedPin = pin;
+  }catch(e){
+    console.error("Gagal menyimpan PIN:", e);
+    storedPin = pin; // tetap lanjut untuk sesi ini walau gagal persist
+  }
+}
+
+function renderPinDots(){
+  const dots = document.querySelectorAll('#pinDots .pin-dot');
+  dots.forEach((d,i)=>{ d.classList.toggle('filled', i < pinBuffer.length); d.classList.remove('error'); });
+}
+function pinError(msg){
+  document.querySelectorAll('#pinDots .pin-dot').forEach(d=>d.classList.add('error'));
+  const m = document.getElementById('pinMsg');
+  m.textContent = msg; m.classList.add('error');
+  setTimeout(()=>{
+    pinBuffer=''; renderPinDots();
+    m.textContent = '\u00A0'; m.classList.remove('error');
+  }, 500);
+}
+function setPinScreenMode(mode){
+  pinMode = mode;
+  pinBuffer = '';
+  renderPinDots();
+  const sub = document.getElementById('pinSubText');
+  const lbl = document.getElementById('pinLabelSm');
+  const msg = document.getElementById('pinMsg');
+  msg.textContent = '\u00A0'; msg.classList.remove('error');
+  if(mode==='setup-first'){
+    sub.textContent = 'Buat PIN 6 digit untuk mengamankan data pengeluaranmu';
+    lbl.textContent = 'BUAT PIN';
+  } else if(mode==='setup-confirm'){
+    sub.textContent = 'Ulangi PIN yang sama untuk konfirmasi';
+    lbl.textContent = 'KONFIRMASI PIN';
+  } else {
+    sub.textContent = 'Masukkan PIN 6 digit untuk melanjutkan';
+    lbl.textContent = 'MASUKKAN PIN';
+  }
+}
+
+function unlockApp(){
+  document.getElementById('screen-pin').classList.remove('active');
+  document.getElementById('mainApp').style.display = 'block';
+  updateAutoTime();
+  renderLog();
+  renderRecap();
+}
+function lockApp(){
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('screen-pin').classList.add('active');
+  setPinScreenMode('login');
+}
+
+document.querySelectorAll('.nk[data-n]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    if(pinBuffer.length>=6) return;
+    pinBuffer += btn.dataset.n;
+    renderPinDots();
+    if(pinBuffer.length===6){
+      if(pinMode==='setup-first'){
+        tempFirstPin = pinBuffer;
+        setTimeout(()=> setPinScreenMode('setup-confirm'), 150);
+      } else if(pinMode==='setup-confirm'){
+        if(pinBuffer===tempFirstPin){
+          await savePin(pinBuffer);
+          setTimeout(unlockApp, 150);
+        } else {
+          pinError('PIN tidak cocok, coba lagi');
+          setTimeout(()=> setPinScreenMode('setup-first'), 550);
+        }
+      } else { // login
+        if(pinBuffer===storedPin){
+          setTimeout(unlockApp, 150);
+        } else {
+          pinError('PIN salah');
+        }
+      }
+    }
+  });
+});
+document.getElementById('pinDel').addEventListener('click', ()=>{
+  pinBuffer = pinBuffer.slice(0,-1);
+  renderPinDots();
+});
+document.getElementById('btnLogout').addEventListener('click', lockApp);
+
+// ---- NAV TABS ----
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['input','log','recap','setelan'].forEach(t=>{
+      document.getElementById('page-'+t).classList.toggle('active', t===btn.dataset.tab);
+    });
+    if(btn.dataset.tab==='log') renderLog();
+    if(btn.dataset.tab==='recap') renderRecap();
+  });
+});
+
+// ---- RECAP TOGGLE ----
+document.querySelectorAll('.toggle-btn-sm').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.toggle-btn-sm').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    recapMode = btn.dataset.recap;
+    renderRecap();
+  });
+});
+
+// ---- SAVE EXPENSE ----
+document.getElementById('btnSave').addEventListener('click', async ()=>{
+  const nominalRaw = document.getElementById('inpNominal').value.replace(/[^0-9]/g,'');
+  const item = document.getElementById('inpItem').value.trim();
+  const category = document.getElementById('inpCategory').value;
+
+  if(!nominalRaw || Number(nominalRaw)<=0){ alert('Isi nominal dengan benar'); return; }
+  if(!item){ alert('Isi nama barang / keperluan'); return; }
+
+  const now = new Date();
+  expenses.push({
+    id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    nominal: Number(nominalRaw), item, category, ts: now.toISOString()
+  });
+  await saveExpenses();
+
+  document.getElementById('inpNominal').value='';
+  document.getElementById('inpItem').value='';
+  document.getElementById('inpCategory').selectedIndex=0;
+
+  viewDate = new Date(now); viewDate.setHours(0,0,0,0);
+
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelector('[data-tab="log"]').classList.add('active');
+  ['input','log','recap'].forEach(t=>document.getElementById('page-'+t).classList.toggle('active', t==='log'));
+  renderLog();
+});
+
+// ---- LOG PAGE ----
+document.getElementById('prevDay').addEventListener('click', ()=>{ viewDate.setDate(viewDate.getDate()-1); renderLog(); });
+document.getElementById('nextDay').addEventListener('click', ()=>{ viewDate.setDate(viewDate.getDate()+1); renderLog(); });
+
+function renderLog(){
+  const key = dateKey(viewDate);
+  const todayKey = dateKey(new Date());
+  document.getElementById('dayLabel').textContent = (key===todayKey? "Hari ini · " : "") + formatFullDate(viewDate);
+
+  const items = expenses.filter(e=>dateKey(new Date(e.ts))===key).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  document.getElementById('dayCount').textContent = items.length;
+  document.getElementById('dayTotal').textContent = formatRupiah(items.reduce((s,e)=>s+e.nominal,0));
+
+  const list = document.getElementById('logList');
+  if(items.length===0){
+    list.innerHTML = '<div class="empty-note">Belum ada pengeluaran tercatat di hari ini.</div>';
+    return;
+  }
+  list.innerHTML = items.map(e=>{
+    const t = new Date(e.ts);
+    return `<div class="entry-row">
+      <div>
+        <div class="entry-nominal">${escapeHtml(e.item)}</div>
+        <div class="entry-time"><span class="entry-cat">${e.category}</span>${pad(t.getHours())}:${pad(t.getMinutes())}</div>
+      </div>
+      <div class="entry-actions" style="align-items:center;">
+        <div class="entry-nominal" style="margin-right:4px;">${formatRupiah(e.nominal)}</div>
+        <button class="icon-btn danger" data-id="${e.id}">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.icon-btn.danger').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      expenses = expenses.filter(e=>e.id!==btn.dataset.id);
+      await saveExpenses();
+      renderLog();
+    });
+  });
+}
+
+// ---- RECAP PAGE ----
+function getWeekRange(d){
+  const day = d.getDay();
+  const diffToMon = (day===0? -6 : 1-day);
+  const monday = new Date(d); monday.setDate(d.getDate()+diffToMon); monday.setHours(0,0,0,0);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  return [monday, sunday];
+}
+
+function renderRecap(){
+  if(recapMode==='week') renderWeek(); else renderMonth();
+}
+
+function renderWeek(){
+  const [monday, sunday] = getWeekRange(viewDate);
+  document.getElementById('recapRangeLabel').textContent = `MINGGU INI · ${formatShortDate(monday)} - ${formatShortDate(sunday)}`;
+
+  let rows = []; let weekTotal = 0; let weekCount = 0;
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const key = dateKey(d);
+    const dayItems = expenses.filter(e=>dateKey(new Date(e.ts))===key);
+    const sum = dayItems.reduce((s,e)=>s+e.nominal,0);
+    weekTotal += sum; weekCount += dayItems.length;
+    rows.push({label: HARI[d.getDay()]+", "+formatShortDate(d), count: dayItems.length, sum});
+  }
+
+  document.getElementById('recapTotalAmount').textContent = formatRupiah(weekTotal);
+  document.getElementById('recapTotalSub').textContent = `TOTAL · ${weekCount} ITEM`;
+
+  const list = document.getElementById('recapList');
+  if(weekCount===0){ list.innerHTML = '<div class="empty-note">Belum ada pengeluaran minggu ini.</div>'; return; }
+  list.innerHTML = rows.map(r=>`<div class="history-row">
+      <div><div class="hd-date">${r.label}</div><div class="hd-sub">${r.count} item</div></div>
+      <div class="hd-total">${formatRupiah(r.sum)}</div>
+    </div>`).join('');
+}
+
+function renderMonth(){
+  const y = viewDate.getFullYear(); const m = viewDate.getMonth();
+  document.getElementById('recapRangeLabel').textContent = `BULAN ${BULAN[m].toUpperCase()} ${y}`;
+
+  const monthItems = expenses.filter(e=>{ const d=new Date(e.ts); return d.getFullYear()===y && d.getMonth()===m; });
+  const byDate = {};
+  monthItems.forEach(e=>{
+    const d = new Date(e.ts); const key = dateKey(d);
+    if(!byDate[key]) byDate[key] = {count:0, sum:0, date:d};
+    byDate[key].count++; byDate[key].sum += e.nominal;
+  });
+  const sortedKeys = Object.keys(byDate).sort((a,b)=>new Date(byDate[b].date)-new Date(byDate[a].date));
+  const monthTotal = monthItems.reduce((s,e)=>s+e.nominal,0);
+
+  document.getElementById('recapTotalAmount').textContent = formatRupiah(monthTotal);
+  document.getElementById('recapTotalSub').textContent = `TOTAL · ${monthItems.length} ITEM`;
+
+  const list = document.getElementById('recapList');
+  if(sortedKeys.length===0){ list.innerHTML = '<div class="empty-note">Belum ada pengeluaran bulan ini.</div>'; return; }
+  list.innerHTML = sortedKeys.map(k=>{
+    const r = byDate[k];
+    return `<div class="history-row">
+      <div><div class="hd-date">${formatShortDate(r.date)}</div><div class="hd-sub">${r.count} item</div></div>
+      <div class="hd-total">${formatRupiah(r.sum)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---- EXPORT / IMPORT ----
+document.getElementById('btnExport').addEventListener('click', ()=>{
+  const now = new Date();
+  const filename = `spendlog-export-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}.json`;
+  const blob = new Blob([JSON.stringify(expenses, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btnImportTrigger').addEventListener('click', ()=>{
+  document.getElementById('fileImport').click();
+});
+document.getElementById('fileImport').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(!Array.isArray(data)) throw new Error('format tidak sesuai');
+      const valid = data.every(x=> x && typeof x.nominal==='number' && typeof x.item==='string' && typeof x.ts==='string');
+      if(!valid) throw new Error('struktur data tidak sesuai');
+      const proceed = confirm(`File berisi ${data.length} catatan. Impor akan MENGGANTIKAN seluruh data yang ada saat ini. Lanjutkan?`);
+      if(proceed){
+        expenses = data;
+        await saveExpenses();
+        renderLog(); renderRecap();
+        alert(`Impor berhasil: ${data.length} item dimuat.`);
+      }
+    }catch(err){
+      alert('Gagal impor: file JSON tidak valid atau formatnya tidak sesuai.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+// ---- CHANGE PIN MODAL ----
+let cpBuffer = '';
+let cpMode = 'verify'; // 'verify' | 'new-first' | 'new-confirm'
+let cpNewFirst = '';
+
+function cpRenderDots(){
+  document.querySelectorAll('#cpDots .pin-dot').forEach((d,i)=>{
+    d.classList.toggle('filled', i<cpBuffer.length);
+    d.classList.remove('error');
+  });
+}
+function cpError(msg){
+  document.querySelectorAll('#cpDots .pin-dot').forEach(d=>d.classList.add('error'));
+  const m = document.getElementById('cpMsg');
+  m.textContent = msg; m.classList.add('error');
+  setTimeout(()=>{
+    cpBuffer=''; cpRenderDots();
+    m.textContent='\u00A0'; m.classList.remove('error');
+  }, 550);
+}
+function cpSetMode(mode){
+  cpMode = mode; cpBuffer=''; cpRenderDots();
+  const sub = document.getElementById('cpSub');
+  const msg = document.getElementById('cpMsg');
+  msg.textContent='\u00A0'; msg.classList.remove('error');
+  if(mode==='verify') sub.textContent = 'Masukkan PIN saat ini';
+  else if(mode==='new-first') sub.textContent = 'Masukkan PIN baru (6 digit)';
+  else sub.textContent = 'Ulangi PIN baru untuk konfirmasi';
+}
+function openPinModal(){
+  cpSetMode('verify');
+  document.getElementById('pinModalOverlay').classList.add('open');
+}
+function closePinModal(){
+  document.getElementById('pinModalOverlay').classList.remove('open');
+}
+document.getElementById('btnChangePin').addEventListener('click', openPinModal);
+document.getElementById('cpClose').addEventListener('click', closePinModal);
+document.getElementById('pinModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id==='pinModalOverlay') closePinModal();
+});
+
+document.querySelectorAll('#cpNumpad .nk[data-cn]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    if(cpBuffer.length>=6) return;
+    cpBuffer += btn.dataset.cn;
+    cpRenderDots();
+    if(cpBuffer.length===6){
+      if(cpMode==='verify'){
+        if(cpBuffer===storedPin){
+          setTimeout(()=> cpSetMode('new-first'), 150);
+        } else {
+          cpError('PIN saat ini salah');
+        }
+      } else if(cpMode==='new-first'){
+        cpNewFirst = cpBuffer;
+        setTimeout(()=> cpSetMode('new-confirm'), 150);
+      } else { // new-confirm
+        if(cpBuffer===cpNewFirst){
+          await savePin(cpBuffer);
+          document.getElementById('cpMsg').textContent = 'PIN berhasil diubah';
+          setTimeout(closePinModal, 700);
+        } else {
+          cpError('Konfirmasi tidak cocok, ulangi PIN baru');
+          setTimeout(()=> cpSetMode('new-first'), 550);
+        }
+      }
+    }
+  });
+});
+document.getElementById('cpDel').addEventListener('click', ()=>{
+  cpBuffer = cpBuffer.slice(0,-1);
+  cpRenderDots();
+});
+
+// ---- INIT ----
+(async function init(){
+  updateAutoTime();
+  await loadExpenses();
+  await loadPin();
+  if(storedPin){
+    setPinScreenMode('login');
+  } else {
+    setPinScreenMode('setup-first');
+  }
+})();
+</script>
+</body>
+</html>
