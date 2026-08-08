@@ -438,23 +438,25 @@ function showStorageWarning(){
   if(!slot || document.getElementById('storageWarn')) return;
   const el = document.createElement('div');
   el.id='storageWarn'; el.className='storage-warn';
-  el.textContent='⚠ Penyimpanan otomatis sedang bermasalah — data hanya tersimpan sementara di sesi ini.';
+  el.textContent='⚠ Browser ini memblokir penyimpanan lokal (localStorage) — data hanya tersimpan sementara di sesi ini. Coba nonaktifkan mode privat/incognito, atau gunakan Export JSON secara rutin sebagai backup.';
   slot.appendChild(el);
 }
 
 async function loadExpenses(){
-  if(!storageOk) return;
   try{
-    const res = await window.storage.get('expenses', false);
-    expenses = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ expenses = []; }
+    const raw = localStorage.getItem('spendlog_expenses');
+    expenses = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    expenses = [];
+    storageOk = false;
+    showStorageWarning();
+  }
 }
 async function saveExpenses(){
-  if(!storageOk) return;
   try{
-    await window.storage.set('expenses', JSON.stringify(expenses), false);
+    localStorage.setItem('spendlog_expenses', JSON.stringify(expenses));
   }catch(e){
-    console.error("Gagal menyimpan ke penyimpanan persisten:", e);
+    console.error("Gagal menyimpan ke localStorage:", e);
     storageOk = false;
     showStorageWarning();
   }
@@ -486,13 +488,12 @@ document.getElementById('themeTogglePin').addEventListener('click', toggleTheme)
 // ---- PIN LOGIC ----
 async function loadPin(){
   try{
-    const res = await window.storage.get('pin', false);
-    storedPin = res && res.value ? res.value : null;
+    storedPin = localStorage.getItem('spendlog_pin') || null;
   }catch(e){ storedPin = null; }
 }
 async function savePin(pin){
   try{
-    await window.storage.set('pin', pin, false);
+    localStorage.setItem('spendlog_pin', pin);
     storedPin = pin;
   }catch(e){
     console.error("Gagal menyimpan PIN:", e);
@@ -536,11 +537,13 @@ function setPinScreenMode(mode){
 function unlockApp(){
   document.getElementById('screen-pin').classList.remove('active');
   document.getElementById('mainApp').style.display = 'block';
+  try{ localStorage.setItem('spendlog_session', '1'); }catch(e){}
   updateAutoTime();
   renderLog();
   renderRecap();
 }
 function lockApp(){
+  try{ localStorage.removeItem('spendlog_session'); }catch(e){}
   document.getElementById('mainApp').style.display = 'none';
   document.getElementById('screen-pin').classList.add('active');
   setPinScreenMode('login');
@@ -857,7 +860,12 @@ document.getElementById('cpDel').addEventListener('click', ()=>{
   updateAutoTime();
   await loadExpenses();
   await loadPin();
-  if(storedPin){
+  let sessionActive = false;
+  try{ sessionActive = localStorage.getItem('spendlog_session')==='1'; }catch(e){}
+
+  if(storedPin && sessionActive){
+    unlockApp();
+  } else if(storedPin){
     setPinScreenMode('login');
   } else {
     setPinScreenMode('setup-first');
